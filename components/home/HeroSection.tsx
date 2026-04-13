@@ -109,6 +109,8 @@ export default function HeroSection() {
           Teams of 4 go head-to-head across a full night of drinking games and challenges,
           earning points with every win. At the end of the night, one team takes home
           the glory — and the bragging rights.
+
+          *Games and Rules Subject to Change
         </p>
 
         {/* CTAs */}
@@ -139,7 +141,7 @@ export default function HeroSection() {
               icon: Trophy,
               color: "#F4C300",
               title: "How It Works",
-              body: "Teams of 4 compete across 6 events all night long. Every win and bonus challenge earns points. Most points at the end wins the championship.",
+              body: "Teams of 4 compete across 5 events all night long. Every win and bonus challenge earns points. Most points at the end wins the championship.",
             },
             {
               icon: Beer,
