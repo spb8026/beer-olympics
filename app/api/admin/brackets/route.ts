@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { FieldValue } from "firebase-admin/firestore";
-import type { Round } from "@/types";
+import type { Round, PlayerGame } from "@/types";
 
 function requireAdmin(req: NextRequest) {
   const cookie = req.cookies.get("admin-auth");
@@ -13,20 +13,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { gameId, rounds } = (await req.json()) as {
-    gameId: string;
-    rounds: Round[];
-  };
+  const body = await req.json();
+  const { gameId } = body as { gameId: string };
 
-  await adminDb
-    .collection("brackets")
-    .doc(gameId)
-    .set({
+  // Player-game format
+  if (body.playerGames !== undefined) {
+    const { playerGames, gameSize } = body as {
+      playerGames: PlayerGame[];
+      gameSize: number;
+    };
+    await adminDb.collection("brackets").doc(gameId).set({
       gameId,
       generated: true,
-      rounds,
+      rounds: [],
+      playerGames,
+      gameSize,
       updatedAt: FieldValue.serverTimestamp(),
     });
+    return NextResponse.json({ success: true });
+  }
+
+  // Standard rounds format
+  const { rounds } = body as { rounds: Round[] };
+  await adminDb.collection("brackets").doc(gameId).set({
+    gameId,
+    generated: true,
+    rounds,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
 
   return NextResponse.json({ success: true });
 }
@@ -36,11 +50,19 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { gameId, rounds } = (await req.json()) as {
-    gameId: string;
-    rounds: Round[];
-  };
+  const body = await req.json();
+  const { gameId } = body as { gameId: string };
 
+  if (body.playerGames !== undefined) {
+    const { playerGames } = body as { playerGames: PlayerGame[] };
+    await adminDb
+      .collection("brackets")
+      .doc(gameId)
+      .update({ playerGames, updatedAt: FieldValue.serverTimestamp() });
+    return NextResponse.json({ success: true });
+  }
+
+  const { rounds } = body as { rounds: Round[] };
   await adminDb
     .collection("brackets")
     .doc(gameId)

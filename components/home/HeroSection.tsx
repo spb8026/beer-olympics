@@ -1,19 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { doc, onSnapshot, Timestamp } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
+import type { Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Calendar, MapPin, Beer, Trophy, Star, Shirt } from "lucide-react";
+import { Calendar, MapPin, Beer, Trophy, Star, Shirt, UtensilsCrossed } from "lucide-react";
 import Link from "next/link";
 import type { SiteConfig } from "@/types";
 
-function formatDate(ts: Timestamp | null): string {
-  if (!ts) return "April 25, 2026";
-  return ts.toDate().toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+function toJsDate(ts: unknown): Date | null {
+  if (!ts) return null;
+  try {
+    if (typeof (ts as Timestamp).toDate === "function") return (ts as Timestamp).toDate();
+    if (typeof ts === "object" && ts !== null && "seconds" in ts)
+      return new Date((ts as { seconds: number }).seconds * 1000);
+    if (typeof ts === "string") return new Date(ts);
+  } catch {
+    // fall through
+  }
+  return null;
+}
+
+function formatDate(ts: unknown): string {
+  const d = toJsDate(ts);
+  if (!d || isNaN(d.getTime())) return "April 25, 2026";
+  return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
 function OlympicRings({ className = "" }: { className?: string }) {
@@ -66,7 +82,7 @@ export default function HeroSection() {
         </div>
 
         {/* Title */}
-        <h1 className="text-5xl sm:text-7xl font-black text-center text-yellow-400 leading-none tracking-tight mb-6 drop-shadow-lg">
+        <h1 suppressHydrationWarning className="text-5xl sm:text-7xl font-black text-center text-yellow-400 leading-none tracking-tight mb-6 drop-shadow-lg">
           {eventName}
         </h1>
 
@@ -77,14 +93,14 @@ export default function HeroSection() {
             style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
           >
             <Calendar className="w-5 h-5 text-yellow-400 shrink-0" />
-            <span className="font-bold">{eventDate}</span>
+            <span suppressHydrationWarning className="font-bold">{eventDate}</span>
           </div>
           <div
             className="flex items-center gap-2 rounded-xl px-5 py-3 text-slate-200"
             style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
           >
             <MapPin className="w-5 h-5 text-yellow-400 shrink-0" />
-            <span className="font-bold">{location}</span>
+            <span suppressHydrationWarning className="font-bold">{location}</span>
           </div>
         </div>
 
@@ -117,7 +133,7 @@ export default function HeroSection() {
         </div>
 
         {/* Info cards */}
-        <div className="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
           {[
             {
               icon: Trophy,
@@ -136,6 +152,12 @@ export default function HeroSection() {
               color: "#DF0024",
               title: "Themes & Costumes",
               body: "Every team picks a theme and dresses accordingly. Best costume earns bonus points — go all out. Pick a theme your whole team can commit to.",
+            },
+            {
+              icon: UtensilsCrossed,
+              color: "#009F6B",
+              title: "Potluck Food",
+              body: "This is a potluck event — everyone brings a dish. Sign up below so we end up with a real spread. Appetizers, mains, sides, desserts — all welcome.",
             },
           ].map(({ icon: Icon, color, title, body }) => (
             <div
@@ -160,12 +182,13 @@ export default function HeroSection() {
         className="relative"
         style={{ background: "rgba(255,255,255,0.03)", borderTop: "1px solid rgba(255,255,255,0.07)" }}
       >
-        <div className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+        <div className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-2 sm:grid-cols-5 gap-6 text-center">
           {[
             { value: "6", label: "Events", color: "#0085C7" },
             { value: "4", label: "Players per Team", color: "#F4C300" },
             { value: "★ Bonus", label: "Points for Costumes", color: "#009F6B" },
-            { value: "BYOB", label: "Bring Your Own", color: "#DF0024" },
+            { value: "$8", label: "Entry per Team", color: "#F4C300" },
+            { value: "Potluck", label: "Bring a Dish", color: "#009F6B" },
           ].map(({ value, label, color }) => (
             <div key={label}>
               <div className="text-2xl sm:text-3xl font-black mb-0.5" style={{ color }}>

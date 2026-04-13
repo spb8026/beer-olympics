@@ -30,6 +30,7 @@ const games = [
     name: "Beer Pong",
     slug: "beer-pong",
     order: 1,
+    gameType: "team-bracket",
     description:
       "The classic. Two teams face off across a table, taking turns throwing a ping pong ball into the opposing team's cups.",
     rules: [
@@ -46,6 +47,7 @@ const games = [
     name: "Baseball",
     slug: "baseball",
     order: 2,
+    gameType: "round-robin",
     description:
       "Beer Olympics edition of America's favorite pastime. Hit, run, drink.",
     rules: [
@@ -62,6 +64,7 @@ const games = [
     name: "Rage Cage",
     slug: "rage-cage",
     order: 3,
+    gameType: "player-game",
     description:
       "A fast-paced elimination game where speed and bouncing skills are everything.",
     rules: [
@@ -79,6 +82,7 @@ const games = [
     name: "Chandelier",
     slug: "chandelier",
     order: 4,
+    gameType: "player-game",
     description:
       "Everyone has a cup. One cup rules them all. Sink the center — everyone drinks.",
     rules: [
@@ -96,6 +100,7 @@ const games = [
     name: "Flip Cup",
     slug: "flip-cup",
     order: 5,
+    gameType: "team-bracket",
     description:
       "Drink, flip, repeat. The ultimate team relay race.",
     rules: [
@@ -112,6 +117,7 @@ const games = [
     name: "Hungry Hippo",
     slug: "hungry-hippo",
     order: 6,
+    gameType: "round-robin",
     description:
       "Inspired by the childhood game — but with beer. Crawl, grab, drink.",
     rules: [
@@ -129,6 +135,7 @@ const games = [
     name: "Bonus Points",
     slug: "bonus-points",
     order: 7,
+    gameType: "none",
     description:
       "Extra points up for grabs throughout the day. Awarded by the host for spirit, costume, and special challenges.",
     rules: [

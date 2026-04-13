@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { addTeam } from "@/lib/firestore/teams";
 import { Users } from "lucide-react";
 
 export default function TeamSignupForm({ onSuccess }: { onSuccess?: () => void }) {
@@ -26,7 +25,12 @@ export default function TeamSignupForm({ onSuccess }: { onSuccess?: () => void }
     setLoading(true);
     setError("");
     try {
-      await addTeam({ teamName: teamName.trim(), theme: theme.trim(), players: filledPlayers });
+      const res = await fetch("/api/teams", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teamName: teamName.trim(), theme: theme.trim(), players: filledPlayers }),
+      });
+      if (!res.ok) throw new Error("Failed");
       setSuccess(true);
       onSuccess?.();
     } catch {
@@ -44,8 +48,11 @@ export default function TeamSignupForm({ onSuccess }: { onSuccess?: () => void }
       >
         <div className="text-4xl mb-3">🎉</div>
         <h3 className="text-xl font-black text-green-400 mb-1">Team registered!</h3>
-        <p className="text-slate-400 text-sm">
+        <p className="text-slate-400 text-sm mb-3">
           <strong className="text-white">{teamName}</strong> is on the list. See you on game day!
+        </p>
+        <p className="text-yellow-400 text-sm font-bold">
+          $8 entry fee per team, Venmo Shawn or Pay @ Door
         </p>
       </div>
     );
@@ -116,6 +123,14 @@ export default function TeamSignupForm({ onSuccess }: { onSuccess?: () => void }
       </div>
 
       {error && <p className="text-red-400 text-sm font-medium">{error}</p>}
+
+      <div
+        className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm"
+        style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.2)" }}
+      >
+        <span className="font-black text-yellow-400">$8</span>
+        <span className="text-slate-400"> entry fee per team, Venmo Shawn or Pay @ Door</span>
+      </div>
 
       <button
         type="submit"

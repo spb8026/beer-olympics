@@ -6,6 +6,17 @@ import { db } from "@/lib/firebase";
 import type { SiteConfig } from "@/types";
 import { Save, Eye, EyeOff } from "lucide-react";
 
+/** Converts any Firestore date representation to a JS Date */
+function toDateObj(ts: unknown): Date {
+  if (!ts) return new Date();
+  if (typeof (ts as { toDate?: unknown }).toDate === "function")
+    return (ts as { toDate: () => Date }).toDate();
+  if (typeof ts === "object" && ts !== null && "seconds" in ts)
+    return new Date((ts as { seconds: number }).seconds * 1000);
+  if (typeof ts === "string") return new Date(ts);
+  return new Date();
+}
+
 const inputStyle = {
   background: "rgba(255,255,255,0.05)",
   border: "1px solid rgba(255,255,255,0.1)",
@@ -33,7 +44,7 @@ export default function ConfigEditor() {
         setForm({
           eventName: data.eventName ?? "",
           location: data.location ?? "",
-          eventDateStr: data.eventDate ? data.eventDate.toDate().toISOString().slice(0, 10) : "",
+          eventDateStr: data.eventDate ? toDateObj(data.eventDate).toISOString().slice(0, 10) : "",
           accessCode: data.accessCode ?? "",
           bracketsVisible: data.bracketsVisible ?? false,
         });

@@ -23,6 +23,8 @@ export interface FreeAgent {
   createdAt: Timestamp;
 }
 
+export type GameType = "team-bracket" | "player-game" | "round-robin" | "none";
+
 export interface Game {
   id: string;
   name: string;
@@ -30,6 +32,7 @@ export interface Game {
   description: string;
   rules: string[];
   order: number;
+  gameType: GameType;
 }
 
 export type MatchStatus = "pending" | "active" | "complete";
@@ -51,10 +54,24 @@ export interface Round {
   matches: Match[];
 }
 
+export interface PlayerGameParticipant {
+  id: string;   // "teamId::playerIndex"
+  name: string; // "PlayerName (Team Name)"
+}
+
+export interface PlayerGame {
+  gameId: string;
+  participants: PlayerGameParticipant[];
+  winnerId: string | null;
+  status: MatchStatus;
+}
+
 export interface Bracket {
   gameId: string;
   generated: boolean;
   rounds: Round[];
+  playerGames?: PlayerGame[];
+  gameSize?: number;
   updatedAt: Timestamp | null;
 }
 
@@ -68,6 +85,24 @@ export interface Invite {
 export interface TeamScore {
   teamId: string;
   teamName: string;
-  games: Record<string, number>; // gameId -> points
+  games: Record<string, number>; // gameId -> points (team games only)
   bonus: number;
+}
+
+export interface PlayerScore {
+  playerId: string;   // "teamId::playerIndex"
+  playerName: string;
+  teamId: string;
+  teamName: string;
+  games: Record<string, number>; // gameId -> points (player games only)
+}
+
+export type PotluckCategory = "Appetizer" | "Main Dish" | "Side" | "Dessert" | "Drinks" | "Other";
+
+export interface PotluckSignup {
+  id: string;
+  name: string;
+  item: string;
+  category: PotluckCategory;
+  createdAt: Timestamp;
 }

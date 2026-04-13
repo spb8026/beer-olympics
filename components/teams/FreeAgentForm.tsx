@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { addFreeAgent } from "@/lib/firestore/freeAgents";
 import { UserPlus } from "lucide-react";
 
 export default function FreeAgentForm({ onSuccess }: { onSuccess?: () => void }) {
@@ -15,7 +14,12 @@ export default function FreeAgentForm({ onSuccess }: { onSuccess?: () => void })
     setLoading(true);
     setError("");
     try {
-      await addFreeAgent(name.trim());
+      const res = await fetch("/api/free-agents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      if (!res.ok) throw new Error("Failed");
       setSuccess(true);
       onSuccess?.();
     } catch {
