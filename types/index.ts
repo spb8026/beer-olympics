@@ -106,3 +106,10 @@ export interface PotluckSignup {
   category: PotluckCategory;
   createdAt: Timestamp;
 }
+
+export interface Rsvp {
+  id: string;
+  firstName: string;
+  lastName: string;
+  createdAt: Timestamp;
+}

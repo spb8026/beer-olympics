@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Beer, Trophy, Users, Gamepad2, Medal } from "lucide-react";
+import { Beer, Trophy, Users, Gamepad2, Medal, UtensilsCrossed } from "lucide-react";
 
 const links = [
   { href: "/home", label: "Home", icon: Beer },
@@ -10,6 +10,7 @@ const links = [
   { href: "/teams", label: "Teams", icon: Users },
   { href: "/brackets", label: "Brackets", icon: Trophy },
   { href: "/leaderboard", label: "Leaderboard", icon: Medal },
+  { href: "/potluck", label: "Potluck", icon: UtensilsCrossed },
 ];
 
 const ringColors = ["#0085C7", "#F4C300", "#DF0024", "#009F6B"];

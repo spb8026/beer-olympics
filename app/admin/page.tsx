@@ -9,9 +9,10 @@ import BracketManager from "@/components/admin/BracketManager";
 import InviteManager from "@/components/admin/InviteManager";
 import PointsManager from "@/components/admin/PointsManager";
 import PaymentTracker from "@/components/admin/PaymentTracker";
-import { Settings, Users, UserPlus, Gamepad2, Trophy, UserCheck, Medal, DollarSign } from "lucide-react";
+import RsvpManager from "@/components/admin/RsvpManager";
+import { Settings, Users, UserPlus, Gamepad2, Trophy, UserCheck, Medal, DollarSign, ClipboardList } from "lucide-react";
 
-type Tab = "config" | "teams" | "freeagents" | "games" | "brackets" | "invites" | "points" | "payments";
+type Tab = "config" | "teams" | "freeagents" | "games" | "brackets" | "invites" | "points" | "payments" | "rsvps";
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "config", label: "Config", icon: Settings },
@@ -22,6 +23,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "invites", label: "Invites", icon: UserCheck },
   { id: "points", label: "Points", icon: Medal },
   { id: "payments", label: "Payments", icon: DollarSign },
+  { id: "rsvps", label: "RSVPs", icon: ClipboardList },
 ];
 
 const card = { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" };
@@ -69,6 +71,7 @@ export default function AdminPage() {
           {tab === "invites" && <InviteManager />}
           {tab === "points" && <PointsManager />}
           {tab === "payments" && <PaymentTracker />}
+          {tab === "rsvps" && <RsvpManager />}
         </div>
       </div>
     </div>

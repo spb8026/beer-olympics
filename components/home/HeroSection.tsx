@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import type { Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Calendar, MapPin, Beer, Trophy, Star, Shirt, UtensilsCrossed } from "lucide-react";
+import { Calendar, MapPin, Beer, Trophy, Star, Shirt, UtensilsCrossed, UserCheck, Check } from "lucide-react";
 import Link from "next/link";
 import type { SiteConfig } from "@/types";
 
@@ -52,12 +52,44 @@ function OlympicRings({ className = "" }: { className?: string }) {
 export default function HeroSection() {
   const [config, setConfig] = useState<SiteConfig | null>(null);
 
+  // RSVP form state
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [rsvpSubmitting, setRsvpSubmitting] = useState(false);
+  const [rsvpSuccess, setRsvpSuccess] = useState(false);
+  const [rsvpError, setRsvpError] = useState("");
+
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "config", "site"), (snap) => {
       if (snap.exists()) setConfig(snap.data() as SiteConfig);
     });
     return unsub;
   }, []);
+
+  async function handleRsvp(e: React.FormEvent) {
+    e.preventDefault();
+    setRsvpError("");
+    if (!firstName.trim() || !lastName.trim()) {
+      setRsvpError("Please enter your first and last name.");
+      return;
+    }
+    setRsvpSubmitting(true);
+    try {
+      const res = await fetch("/api/rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstName, lastName }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error ?? "Failed");
+      setFirstName("");
+      setLastName("");
+      setRsvpSuccess(true);
+    } catch (err) {
+      setRsvpError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setRsvpSubmitting(false);
+    }
+  }
 
   const eventName = config?.eventName ?? "Beer Olympics";
   const eventDate = formatDate(config?.eventDate ?? null);
@@ -134,6 +166,90 @@ export default function HeroSection() {
           </Link>
         </div>
 
+        {/* RSVP */}
+        <div className="max-w-lg mx-auto mb-16">
+          {rsvpSuccess ? (
+            <div
+              className="rounded-2xl p-6 text-center"
+              style={{ background: "rgba(0,133,199,0.08)", border: "1px solid rgba(0,133,199,0.25)" }}
+            >
+              <div className="flex justify-center mb-3">
+                <div className="rounded-full p-2.5" style={{ background: "rgba(0,133,199,0.2)" }}>
+                  <Check className="w-6 h-6" style={{ color: "#0085C7" }} />
+                </div>
+              </div>
+              <p className="text-white font-black text-lg mb-1">You&apos;re on the list!</p>
+              <p className="text-slate-400 text-sm">See you there.</p>
+              <button
+                onClick={() => setRsvpSuccess(false)}
+                className="mt-4 text-xs font-semibold text-slate-500 hover:text-slate-300 transition"
+              >
+                RSVP for someone else
+              </button>
+            </div>
+          ) : (
+            <div
+              className="rounded-2xl p-6"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <div className="rounded-lg p-1.5" style={{ background: "rgba(0,133,199,0.15)" }}>
+                  <UserCheck className="w-4 h-4" style={{ color: "#0085C7" }} />
+                </div>
+                <h3 className="font-black text-white">RSVP</h3>
+                <span className="text-slate-500 text-sm">— let us know you&apos;re coming</span>
+              </div>
+              <form onSubmit={handleRsvp} className="flex flex-col gap-3">
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="First name"
+                    maxLength={60}
+                    className="rounded-xl px-4 py-2.5 text-white placeholder-slate-500 outline-none focus:ring-2 text-sm"
+                    style={{
+                      background: "rgba(255,255,255,0.07)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      // @ts-expect-error ring color via CSS var workaround
+                      "--tw-ring-color": "rgba(0,133,199,0.5)",
+                    }}
+                  />
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Last name"
+                    maxLength={60}
+                    className="rounded-xl px-4 py-2.5 text-white placeholder-slate-500 outline-none focus:ring-2 text-sm"
+                    style={{
+                      background: "rgba(255,255,255,0.07)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      // @ts-expect-error ring color via CSS var workaround
+                      "--tw-ring-color": "rgba(0,133,199,0.5)",
+                    }}
+                  />
+                </div>
+                {rsvpError && (
+                  <p className="text-xs font-semibold" style={{ color: "#DF0024" }}>{rsvpError}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={rsvpSubmitting}
+                  className="flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 font-black text-white text-sm transition disabled:opacity-50"
+                  style={{
+                    background: rsvpSubmitting ? "rgba(0,133,199,0.4)" : "#0085C7",
+                    boxShadow: rsvpSubmitting ? "none" : "0 0 16px rgba(0,133,199,0.3)",
+                  }}
+                >
+                  <UserCheck className="w-4 h-4" />
+                  {rsvpSubmitting ? "Sending…" : "I'm Coming"}
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+
         {/* Info cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
           {[
@@ -159,7 +275,7 @@ export default function HeroSection() {
               icon: UtensilsCrossed,
               color: "#009F6B",
               title: "Potluck Food",
-              body: "This is a potluck event — everyone brings a dish. Sign up below so we end up with a real spread. Appetizers, mains, sides, desserts — all welcome.",
+              body: "This is a potluck event — everyone brings a dish. Head to the Potluck tab to sign up so we end up with a real spread. Appetizers, mains, sides, desserts — all welcome.",
             },
           ].map(({ icon: Icon, color, title, body }) => (
             <div

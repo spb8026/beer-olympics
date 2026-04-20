@@ -1,5 +1,5 @@
-import CodeGate from "@/components/auth/CodeGate";
+import { redirect } from "next/navigation";
 
-export default function LockPage() {
-  return <CodeGate />;
+export default function RootPage() {
+  redirect("/home");
 }
