@@ -57,7 +57,11 @@ export default function PotluckSection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, item, category }),
       });
-      if (!res.ok) throw new Error((await res.json()).error ?? "Failed");
+      if (!res.ok) {
+        let msg = "Something went wrong";
+        try { msg = (await res.json()).error ?? msg; } catch { /* empty body */ }
+        throw new Error(msg);
+      }
       setName("");
       setItem("");
       setCategory("Other");

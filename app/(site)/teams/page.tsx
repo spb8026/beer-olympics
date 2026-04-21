@@ -1,10 +1,77 @@
 "use client";
 
+import { useRef, useState } from "react";
 import TeamSignupForm from "@/components/teams/TeamSignupForm";
 import FreeAgentForm from "@/components/teams/FreeAgentForm";
 import { useTeams } from "@/hooks/useTeams";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { Users } from "lucide-react";
+import { Users, Camera, Check, Loader } from "lucide-react";
+import Image from "next/image";
+import type { Team } from "@/types";
+
+function TeamPhotoUpload({ team }: { team: Team }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploaded, setUploaded] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError("");
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("photo", file);
+      const res = await fetch(`/api/teams/${team.id}/photo`, { method: "POST", body: form });
+      if (!res.ok) {
+        let msg = "Upload failed";
+        try { msg = (await res.json()).error ?? msg; } catch { /* empty body */ }
+        throw new Error(msg);
+      }
+      setUploaded(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  const hasPhoto = !!team.photoUrl || uploaded;
+
+  return (
+    <div className="mt-3">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFile}
+      />
+      {error && <p className="text-xs text-red-400 mb-1">{error}</p>}
+      <button
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="flex items-center gap-1.5 text-xs font-bold rounded-lg px-3 py-1.5 transition disabled:opacity-50"
+        style={
+          hasPhoto
+            ? { background: "rgba(0,159,107,0.15)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.2)" }
+            : { background: "rgba(255,255,255,0.07)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.1)" }
+        }
+      >
+        {uploading ? (
+          <Loader className="w-3.5 h-3.5 animate-spin" />
+        ) : hasPhoto ? (
+          <Check className="w-3.5 h-3.5" />
+        ) : (
+          <Camera className="w-3.5 h-3.5" />
+        )}
+        {uploading ? "Uploading…" : hasPhoto ? "Photo uploaded" : "Upload team photo"}
+      </button>
+    </div>
+  );
+}
 
 export default function TeamsPage() {
   const { teams, loading } = useTeams();
@@ -50,28 +117,43 @@ export default function TeamsPage() {
                   borderTop: `3px solid ${color}`,
                 }}
               >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-black text-white text-lg leading-tight">{team.teamName}</h3>
-                  <span
-                    className="shrink-0 text-xs rounded-full px-2 py-0.5 font-semibold"
-                    style={{ background: `${color}22`, color, border: `1px solid ${color}44` }}
-                  >
-                    {team.theme}
-                  </span>
-                </div>
-                {team.players.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-3">
-                    {team.players.map((player, pi) => (
+                <div className="flex items-start gap-3">
+                  {team.photoUrl && (
+                    <Image
+                      src={team.photoUrl}
+                      alt={`${team.teamName} photo`}
+                      width={56}
+                      height={56}
+                      className="rounded-xl object-cover shrink-0"
+                      style={{ border: `2px solid ${color}44` }}
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="font-black text-white text-lg leading-tight">{team.teamName}</h3>
                       <span
-                        key={pi}
-                        className="text-xs rounded-lg px-2.5 py-1 text-slate-300"
-                        style={{ background: "rgba(255,255,255,0.07)" }}
+                        className="shrink-0 text-xs rounded-full px-2 py-0.5 font-semibold"
+                        style={{ background: `${color}22`, color, border: `1px solid ${color}44` }}
                       >
-                        {player}
+                        {team.theme}
                       </span>
-                    ))}
+                    </div>
+                    {team.players.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {team.players.map((player, pi) => (
+                          <span
+                            key={pi}
+                            className="text-xs rounded-lg px-2.5 py-1 text-slate-300"
+                            style={{ background: "rgba(255,255,255,0.07)" }}
+                          >
+                            {player}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+                <TeamPhotoUpload team={team} />
               </div>
             );
           })}

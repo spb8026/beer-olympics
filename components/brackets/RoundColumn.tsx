@@ -4,9 +4,10 @@ import MatchCard from "./MatchCard";
 interface Props {
   round: Round;
   label: string;
+  teamPhotos?: Record<string, string>;
 }
 
-export default function RoundColumn({ round, label }: Props) {
+export default function RoundColumn({ round, label, teamPhotos }: Props) {
   return (
     <div className="flex flex-col gap-3 min-w-[160px] w-48">
       <div
@@ -20,7 +21,7 @@ export default function RoundColumn({ round, label }: Props) {
         style={{ minHeight: `${round.matches.length * 80}px` }}
       >
         {round.matches.map((match) => (
-          <MatchCard key={match.matchId} match={match} />
+          <MatchCard key={match.matchId} match={match} teamPhotos={teamPhotos} />
         ))}
       </div>
     </div>

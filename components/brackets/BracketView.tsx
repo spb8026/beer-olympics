@@ -10,7 +10,7 @@ import MatchCard from "./MatchCard";
 
 // ─── Round-robin public view ───────────────────────────────────────────────
 
-function RoundRobinView({ rounds }: { rounds: Round[] | undefined }) {
+function RoundRobinView({ rounds, teamPhotos }: { rounds: Round[] | undefined; teamPhotos?: Record<string, string> }) {
   const standings = computeStandings(rounds ?? []);
 
   return (
@@ -66,7 +66,7 @@ function RoundRobinView({ rounds }: { rounds: Round[] | undefined }) {
               <div className="flex flex-col gap-2">
                 {round.matches.map((match) => (
                   <div key={match.matchId} className="max-w-xs">
-                    <MatchCard match={match} />
+                    <MatchCard match={match} teamPhotos={teamPhotos} />
                   </div>
                 ))}
               </div>
@@ -139,7 +139,7 @@ function PlayerGamesView({ playerGames }: { playerGames: PlayerGame[] }) {
 
 // ─── Main export ───────────────────────────────────────────────────────────
 
-export default function BracketView({ game }: { game: Game }) {
+export default function BracketView({ game, teamPhotos }: { game: Game; teamPhotos?: Record<string, string> }) {
   const { bracket, loading } = useBracket(game.id);
   const gameType = game.gameType ?? "team-bracket";
 
@@ -170,7 +170,7 @@ export default function BracketView({ game }: { game: Game }) {
   }
 
   if (gameType === "round-robin") {
-    return <RoundRobinView rounds={bracket.rounds} />;
+    return <RoundRobinView rounds={bracket.rounds} teamPhotos={teamPhotos} />;
   }
 
   if (gameType === "player-game") {
@@ -194,6 +194,7 @@ export default function BracketView({ game }: { game: Game }) {
             key={round.roundNumber}
             round={round}
             label={getRoundLabel(round.roundNumber, totalRounds)}
+            teamPhotos={teamPhotos}
           />
         ))}
       </div>

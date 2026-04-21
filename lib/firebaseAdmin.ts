@@ -1,10 +1,10 @@
-import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { initializeApp, getApps, cert, App } from "firebase-admin/app";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
 
 let _db: Firestore | null = null;
 
-export function getAdminDb(): Firestore {
-  if (_db) return _db;
+function getAdminApp(): App {
+  if (getApps().length > 0) return getApps()[0];
 
   const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
@@ -15,12 +15,12 @@ export function getAdminDb(): Firestore {
     );
   }
 
-  const app =
-    getApps().length > 0
-      ? getApps()[0]
-      : initializeApp({ credential: cert(JSON.parse(key)), projectId });
+  return initializeApp({ credential: cert(JSON.parse(key)), projectId });
+}
 
-  _db = getFirestore(app);
+export function getAdminDb(): Firestore {
+  if (_db) return _db;
+  _db = getFirestore(getAdminApp());
   return _db;
 }
 

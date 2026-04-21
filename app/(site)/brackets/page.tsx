@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useGames } from "@/hooks/useGames";
+import { useTeams } from "@/hooks/useTeams";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import BracketView from "@/components/brackets/BracketView";
@@ -11,8 +12,17 @@ import type { SiteConfig } from "@/types";
 
 export default function BracketsPage() {
   const { games, loading: gamesLoading } = useGames();
+  const { teams } = useTeams();
   const [config, setConfig] = useState<SiteConfig | null>(null);
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
+
+  const teamPhotos = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const team of teams) {
+      if (team.photoUrl) map[team.id] = team.photoUrl;
+    }
+    return map;
+  }, [teams]);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "config", "site"), (snap) => {
@@ -88,7 +98,7 @@ export default function BracketsPage() {
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
             >
               <h2 className="text-xl font-black text-white mb-6">{activeGame.name}</h2>
-              <BracketView game={activeGame} />
+              <BracketView game={activeGame} teamPhotos={teamPhotos} />
             </div>
           )}
         </>

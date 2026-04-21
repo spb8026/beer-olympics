@@ -170,7 +170,9 @@ function AddGameForm({ onDone }: { onDone: () => void }) {
     });
     setSaving(false);
     if (!res.ok) {
-      setError((await res.json()).error ?? "Failed to create game.");
+      let msg = "Failed to create game.";
+      try { msg = (await res.json()).error ?? msg; } catch { /* empty body */ }
+      setError(msg);
       return;
     }
     onDone();

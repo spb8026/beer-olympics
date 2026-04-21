@@ -80,7 +80,11 @@ export default function HeroSection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ firstName, lastName }),
       });
-      if (!res.ok) throw new Error((await res.json()).error ?? "Failed");
+      if (!res.ok) {
+        let msg = "Something went wrong";
+        try { msg = (await res.json()).error ?? msg; } catch { /* empty body */ }
+        throw new Error(msg);
+      }
       setFirstName("");
       setLastName("");
       setRsvpSuccess(true);

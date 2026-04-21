@@ -13,6 +13,7 @@ export interface Team {
   teamName: string;
   theme: string;
   players: string[];
+  photoUrl?: string;
   createdAt: Timestamp;
 }
 
