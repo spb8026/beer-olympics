@@ -2,9 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Beer, Trophy, Users, Gamepad2, Medal, UtensilsCrossed } from "lucide-react";
+import { useEffect, useState } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Beer, Trophy, Users, Gamepad2, Medal, UtensilsCrossed, Camera } from "lucide-react";
+import type { SiteConfig } from "@/types";
 
-const links = [
+const ringColors = ["#0085C7", "#F4C300", "#DF0024", "#009F6B"];
+
+const staticLinks = [
   { href: "/home", label: "Home", icon: Beer },
   { href: "/games", label: "Games", icon: Gamepad2 },
   { href: "/teams", label: "Teams", icon: Users },
@@ -13,10 +19,22 @@ const links = [
   { href: "/potluck", label: "Potluck", icon: UtensilsCrossed },
 ];
 
-const ringColors = ["#0085C7", "#F4C300", "#DF0024", "#009F6B"];
-
 export default function Navbar() {
   const pathname = usePathname();
+  const [photosVisible, setPhotosVisible] = useState(false);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "config", "site"), (snap) => {
+      if (snap.exists()) {
+        setPhotosVisible((snap.data() as SiteConfig).photosVisible ?? false);
+      }
+    });
+    return unsub;
+  }, []);
+
+  const links = photosVisible
+    ? [...staticLinks, { href: "/photos", label: "Photos", icon: Camera }]
+    : staticLinks;
 
   return (
     <header

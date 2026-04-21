@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { SiteConfig } from "@/types";
-import { Save, Eye, EyeOff } from "lucide-react";
+import { Save, Eye, EyeOff, Camera } from "lucide-react";
 
 /** Converts any Firestore date representation to a JS Date */
 function toDateObj(ts: unknown): Date {
@@ -32,6 +32,7 @@ export default function ConfigEditor() {
     eventDateStr: "",
     accessCode: "",
     bracketsVisible: false,
+    photosVisible: false,
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -47,6 +48,7 @@ export default function ConfigEditor() {
           eventDateStr: data.eventDate ? toDateObj(data.eventDate).toISOString().slice(0, 10) : "",
           accessCode: data.accessCode ?? "",
           bracketsVisible: data.bracketsVisible ?? false,
+          photosVisible: data.photosVisible ?? false,
         });
       }
     });
@@ -60,6 +62,7 @@ export default function ConfigEditor() {
       location: form.location,
       accessCode: form.accessCode,
       bracketsVisible: form.bracketsVisible,
+      photosVisible: form.photosVisible,
     };
     if (form.eventDateStr) body.eventDate = new Date(form.eventDateStr + "T12:00:00");
     await fetch("/api/admin/config", {
@@ -124,6 +127,30 @@ export default function ConfigEditor() {
             }
           >
             {form.bracketsVisible ? <><Eye className="w-4 h-4" /> Visible</> : <><EyeOff className="w-4 h-4" /> Hidden</>}
+          </button>
+        </div>
+
+        {/* Photos toggle */}
+        <div
+          className="flex items-center justify-between rounded-xl px-4 py-3"
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+        >
+          <div>
+            <div className="font-bold text-white text-sm flex items-center gap-1.5">
+              <Camera className="w-4 h-4 text-yellow-400" /> Photos Tab Visible to Guests
+            </div>
+            <div className="text-xs text-slate-600">Show the party photo gallery in the nav</div>
+          </div>
+          <button
+            onClick={() => setForm({ ...form, photosVisible: !form.photosVisible })}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition"
+            style={
+              form.photosVisible
+                ? { background: "#F4C300", color: "#0f172a" }
+                : { background: "rgba(255,255,255,0.07)", color: "#64748b" }
+            }
+          >
+            {form.photosVisible ? <><Eye className="w-4 h-4" /> Visible</> : <><EyeOff className="w-4 h-4" /> Hidden</>}
           </button>
         </div>
 

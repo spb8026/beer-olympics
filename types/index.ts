@@ -6,6 +6,7 @@ export interface SiteConfig {
   eventDate: Timestamp | null;
   location: string;
   bracketsVisible: boolean;
+  photosVisible: boolean;
 }
 
 export interface Team {
@@ -105,6 +106,15 @@ export interface PotluckSignup {
   name: string;
   item: string;
   category: PotluckCategory;
+  createdAt: Timestamp;
+}
+
+export interface Photo {
+  id: string;
+  url: string;
+  publicId: string;
+  uploadedBy: string;
+  votes: number;
   createdAt: Timestamp;
 }
 
