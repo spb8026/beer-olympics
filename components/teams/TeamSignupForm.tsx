@@ -6,7 +6,7 @@ import { Users } from "lucide-react";
 export default function TeamSignupForm({ onSuccess }: { onSuccess?: () => void }) {
   const [teamName, setTeamName] = useState("");
   const [theme, setTheme] = useState("");
-  const [players, setPlayers] = useState(["", ""]);
+  const [players, setPlayers] = useState(["", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -17,7 +17,7 @@ export default function TeamSignupForm({ onSuccess }: { onSuccess?: () => void }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const filledPlayers = players.filter((p) => p.trim());
+    const filledPlayers = players.map((p) => p.trim()).filter(Boolean);
     if (filledPlayers.length < 2) {
       setError("Please enter at least 2 player names.");
       return;
@@ -105,14 +105,16 @@ export default function TeamSignupForm({ onSuccess }: { onSuccess?: () => void }
       </div>
 
       <div>
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-2">Players (2 per team)</label>
+        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-2">
+          Players (2 required, up to 4)
+        </label>
         <div className="grid sm:grid-cols-2 gap-3">
           {players.map((p, i) => (
             <input
               key={i}
               value={p}
               onChange={(e) => setPlayer(i, e.target.value)}
-              placeholder={`Player ${i + 1} *`}
+              placeholder={i < 2 ? `Player ${i + 1} *` : `Player ${i + 1} (optional)`}
               className="rounded-lg px-4 py-3 focus:outline-none transition placeholder-slate-600"
               style={inputStyle}
               onFocus={(e) => (e.target.style.borderColor = "#3b82f6")}

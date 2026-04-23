@@ -33,6 +33,7 @@ export default function ConfigEditor() {
     accessCode: "",
     bracketsVisible: false,
     photosVisible: false,
+    teamSize: 2 as 2 | 4,
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -49,6 +50,7 @@ export default function ConfigEditor() {
           accessCode: data.accessCode ?? "",
           bracketsVisible: data.bracketsVisible ?? false,
           photosVisible: data.photosVisible ?? false,
+          teamSize: data.teamSize === 4 ? 4 : 2,
         });
       }
     });
@@ -63,6 +65,7 @@ export default function ConfigEditor() {
       accessCode: form.accessCode,
       bracketsVisible: form.bracketsVisible,
       photosVisible: form.photosVisible,
+      teamSize: form.teamSize,
     };
     if (form.eventDateStr) body.eventDate = new Date(form.eventDateStr + "T12:00:00");
     await fetch("/api/admin/config", {
@@ -152,6 +155,33 @@ export default function ConfigEditor() {
           >
             {form.photosVisible ? <><Eye className="w-4 h-4" /> Visible</> : <><EyeOff className="w-4 h-4" /> Hidden</>}
           </button>
+        </div>
+
+        {/* Team Size */}
+        <div
+          className="flex items-center justify-between rounded-xl px-4 py-3"
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+        >
+          <div>
+            <div className="font-bold text-white text-sm">Team Size</div>
+            <div className="text-xs text-slate-600">Players per team</div>
+          </div>
+          <div className="flex rounded-lg overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.12)" }}>
+            {([2, 4] as const).map((n) => (
+              <button
+                key={n}
+                onClick={() => setForm({ ...form, teamSize: n })}
+                className="w-12 py-2 font-black text-sm transition"
+                style={
+                  form.teamSize === n
+                    ? { background: "#fbbf24", color: "#0f172a" }
+                    : { background: "rgba(255,255,255,0.05)", color: "#64748b" }
+                }
+              >
+                {n}
+              </button>
+            ))}
+          </div>
         </div>
 
         <button

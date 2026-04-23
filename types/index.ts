@@ -7,6 +7,7 @@ export interface SiteConfig {
   location: string;
   bracketsVisible: boolean;
   photosVisible: boolean;
+  teamSize?: 2 | 4;
 }
 
 export interface Team {
