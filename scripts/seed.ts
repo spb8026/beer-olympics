@@ -47,7 +47,7 @@ const games = [
     name: "Baseball",
     slug: "baseball",
     order: 2,
-    gameType: "round-robin",
+    gameType: "paired-round-robin",
     description:
       "Beer Olympics edition of America's favorite pastime. Hit, run, drink.",
     rules: [

@@ -1,4 +1,4 @@
-import type { Team, Round, Match, PlayerGame } from "@/types";
+import type { Team, Round, Match, PlayerGame, TeamPair } from "@/types";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -157,6 +157,68 @@ export function generateRoundRobin(teams: Team[]): Round[] {
   }
 
   return rounds;
+}
+
+/**
+ * Pairs teams into groups of 2, then runs round-robin among the pairs.
+ * Baseball uses this so each side of a match is a 4-person composite team.
+ */
+export function generatePairedRoundRobin(teams: Team[]): { rounds: Round[]; pairings: TeamPair[] } {
+  if (teams.length < 2) return { rounds: [], pairings: [] };
+
+  const seeded = shuffle(teams);
+  const pairings: TeamPair[] = [];
+
+  // Build composite pair entries
+  const pairs: { id: string; name: string }[] = [];
+  for (let i = 0; i + 1 < seeded.length; i += 2) {
+    const a = seeded[i];
+    const b = seeded[i + 1];
+    const pairId = `${a.id}+${b.id}`;
+    const pairName = `${a.teamName} & ${b.teamName}`;
+    pairings.push({ pairId, teamIds: [a.id, b.id], teamNames: [a.teamName, b.teamName], pairName });
+    pairs.push({ id: pairId, name: pairName });
+  }
+  // Odd team left over: give it a solo pair entry
+  if (seeded.length % 2 !== 0) {
+    const lone = seeded[seeded.length - 1];
+    pairings.push({ pairId: lone.id, teamIds: [lone.id, lone.id], teamNames: [lone.teamName, lone.teamName], pairName: lone.teamName });
+    pairs.push({ id: lone.id, name: lone.teamName });
+  }
+
+  if (pairs.length < 2) return { rounds: [], pairings };
+
+  // Circle round-robin among pairs
+  const participants: ({ id: string; name: string } | null)[] =
+    pairs.length % 2 === 0 ? [...pairs] : [...pairs, null];
+  const m = participants.length;
+  const numRounds = m - 1;
+  const fixed = participants[0];
+  const rotatable = [...participants.slice(1)];
+  const rounds: Round[] = [];
+
+  for (let r = 0; r < numRounds; r++) {
+    const circle = [fixed, ...rotatable];
+    const matches: Match[] = [];
+
+    for (let i = 0; i < m / 2; i++) {
+      const t1 = circle[i];
+      const t2 = circle[m - 1 - i];
+      if (!t1 || !t2) continue;
+
+      matches.push({
+        matchId: `prr-r${r + 1}-m${i + 1}`,
+        team1Id: t1.id, team1Name: t1.name, score1: null,
+        team2Id: t2.id, team2Name: t2.name, score2: null,
+        winnerId: null, status: "pending",
+      });
+    }
+
+    if (matches.length > 0) rounds.push({ roundNumber: r + 1, matches });
+    rotatable.unshift(rotatable.pop()!);
+  }
+
+  return { rounds, pairings };
 }
 
 export function getRoundLabel(roundNumber: number, totalRounds: number): string {

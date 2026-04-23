@@ -23,7 +23,9 @@ function TeamLeaderboard() {
   const { teams } = useTeams();
   const { games } = useGames();
 
-  const teamGames = games.filter((g) => g.gameType === "team-bracket" || g.gameType === "round-robin");
+  const teamGames = games.filter(
+    (g) => g.gameType === "team-bracket" || g.gameType === "round-robin" || g.gameType === "paired-round-robin"
+  );
 
   const ranked = teams
     .map((team) => {

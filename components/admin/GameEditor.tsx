@@ -7,10 +7,11 @@ import { Pencil, Save, X, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-re
 import type { Game, GameType } from "@/types";
 
 const GAME_TYPE_OPTIONS: { value: GameType; label: string; description: string }[] = [
-  { value: "team-bracket", label: "Team Bracket",  description: "Single elimination — teams vs teams" },
-  { value: "player-game",  label: "Player Games",  description: "Players randomly grouped into games of a set size" },
-  { value: "round-robin",  label: "Round Robin",   description: "Everyone plays everyone, ranked by wins" },
-  { value: "none",         label: "No Schedule",   description: "Points only, no bracket or schedule" },
+  { value: "team-bracket",       label: "Team Bracket",       description: "Single elimination — teams vs teams" },
+  { value: "player-game",        label: "Player Games",        description: "Players randomly grouped into games of a set size" },
+  { value: "round-robin",        label: "Round Robin",         description: "Everyone plays everyone, ranked by wins" },
+  { value: "paired-round-robin", label: "Paired Round Robin",  description: "Teams paired 2-by-2 each side; pairs play round-robin" },
+  { value: "none",               label: "No Schedule",         description: "Points only, no bracket or schedule" },
 ];
 
 function slugify(name: string) {

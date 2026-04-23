@@ -18,8 +18,10 @@ function TeamPointsTab() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  // Team games: team-bracket and round-robin
-  const teamGames = games.filter((g) => g.gameType === "team-bracket" || g.gameType === "round-robin");
+  // Team games: team-bracket, round-robin, and paired-round-robin
+  const teamGames = games.filter(
+    (g) => g.gameType === "team-bracket" || g.gameType === "round-robin" || g.gameType === "paired-round-robin"
+  );
 
   useEffect(() => {
     if (teams.length === 0) return;

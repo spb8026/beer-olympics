@@ -25,7 +25,7 @@ export interface FreeAgent {
   createdAt: Timestamp;
 }
 
-export type GameType = "team-bracket" | "player-game" | "round-robin" | "none";
+export type GameType = "team-bracket" | "player-game" | "round-robin" | "paired-round-robin" | "none";
 
 export interface Game {
   id: string;
@@ -68,12 +68,20 @@ export interface PlayerGame {
   status: MatchStatus;
 }
 
+export interface TeamPair {
+  pairId: string;
+  teamIds: [string, string];
+  teamNames: [string, string];
+  pairName: string;
+}
+
 export interface Bracket {
   gameId: string;
   generated: boolean;
   rounds: Round[];
   playerGames?: PlayerGame[];
   gameSize?: number;
+  pairings?: TeamPair[];
   updatedAt: Timestamp | null;
 }
 

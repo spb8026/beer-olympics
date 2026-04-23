@@ -8,12 +8,13 @@ import {
   generateBracket,
   generatePlayerGames,
   generateRoundRobin,
+  generatePairedRoundRobin,
   getRoundLabel,
   computeStandings,
 } from "@/lib/bracketUtils";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Shuffle, Save, Trophy, Users } from "lucide-react";
-import type { Round, Match, PlayerGame, GameType } from "@/types";
+import type { Round, Match, PlayerGame, GameType, TeamPair } from "@/types";
 
 // ─── Shared score input ────────────────────────────────────────────────────
 
@@ -312,6 +313,7 @@ function GameBracketEditor({
 
   const [localRounds, setLocalRounds] = useState<Round[] | null>(null);
   const [localPlayerGames, setLocalPlayerGames] = useState<PlayerGame[] | null>(null);
+  const [localPairings, setLocalPairings] = useState<TeamPair[] | null>(null);
   const [gameSize, setGameSize] = useState(4);
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -346,6 +348,10 @@ function GameBracketEditor({
       return;
     }
 
+    if (gameType === "paired-round-robin" && teams.length < 4) {
+      alert("Need at least 4 registered teams to generate paired baseball brackets.");
+      return;
+    }
     if (teams.length < 2) {
       alert("Need at least 2 registered teams.");
       return;
@@ -353,6 +359,24 @@ function GameBracketEditor({
     if (!confirm(`Generate a new schedule for ${gameName}? This will overwrite any existing bracket.`)) return;
 
     setGenerating(true);
+
+    if (gameType === "paired-round-robin") {
+      const { rounds: newRounds, pairings: newPairings } = generatePairedRoundRobin(teams);
+      setLocalRounds(newRounds);
+      setLocalPairings(newPairings);
+
+      await fetch("/api/admin/brackets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gameId, rounds: newRounds, pairings: newPairings }),
+      });
+
+      setGenerating(false);
+      setLocalRounds(null);
+      setLocalPairings(null);
+      return;
+    }
+
     const newRounds =
       gameType === "team-bracket"
         ? generateBracket(teams)
@@ -422,10 +446,11 @@ function GameBracketEditor({
         body: JSON.stringify({ gameId, playerGames: localPlayerGames }),
       });
     } else if (rounds) {
+      const pairings = localPairings ?? bracket?.pairings;
       await fetch("/api/admin/brackets", {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gameId, rounds }),
+        body: JSON.stringify({ gameId, rounds, ...(pairings && { pairings }) }),
       });
     }
 
@@ -447,6 +472,8 @@ function GameBracketEditor({
   const generateLabel =
     gameType === "round-robin"
       ? "Generate Round Robin"
+      : gameType === "paired-round-robin"
+      ? "Generate Paired Bracket"
       : gameType === "player-game"
       ? "Generate Player Groups"
       : "Generate Bracket";
@@ -498,7 +525,7 @@ function GameBracketEditor({
         ) : (
           <p className="text-slate-600 text-sm">No groups yet. Set a size and generate above.</p>
         )
-      ) : gameType === "round-robin" ? (
+      ) : gameType === "round-robin" || gameType === "paired-round-robin" ? (
         rounds && rounds.length > 0 ? (
           <RoundRobinEditor rounds={rounds} onUpdateMatch={updateMatch} />
         ) : (

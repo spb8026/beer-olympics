@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { FieldValue } from "firebase-admin/firestore";
-import type { Round, PlayerGame } from "@/types";
+import type { Round, PlayerGame, TeamPair } from "@/types";
 
 function requireAdmin(req: NextRequest) {
   const cookie = req.cookies.get("admin-auth");
@@ -33,12 +33,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   }
 
-  // Standard rounds format
-  const { rounds } = body as { rounds: Round[] };
+  // Standard rounds format (with optional pairings for paired-round-robin)
+  const { rounds, pairings } = body as { rounds: Round[]; pairings?: TeamPair[] };
   await adminDb.collection("brackets").doc(gameId).set({
     gameId,
     generated: true,
     rounds,
+    ...(pairings !== undefined && { pairings }),
     updatedAt: FieldValue.serverTimestamp(),
   });
 
@@ -62,11 +63,15 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ success: true });
   }
 
-  const { rounds } = body as { rounds: Round[] };
+  const { rounds, pairings } = body as { rounds: Round[]; pairings?: TeamPair[] };
   await adminDb
     .collection("brackets")
     .doc(gameId)
-    .update({ rounds, updatedAt: FieldValue.serverTimestamp() });
+    .update({
+      rounds,
+      ...(pairings !== undefined && { pairings }),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
 
   return NextResponse.json({ success: true });
 }
