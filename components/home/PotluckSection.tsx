@@ -20,6 +20,7 @@ function categoryStyle(cat: string) {
 export default function PotluckSection() {
   const [signups, setSignups] = useState<PotluckSignup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // form state
   const [name, setName] = useState("");
@@ -31,6 +32,10 @@ export default function PotluckSection() {
 
   // optimistic delete tracking
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin-probe").then((r) => { if (r.ok) setIsAdmin(true); });
+  }, []);
 
   async function fetchSignups() {
     try {
@@ -266,14 +271,16 @@ export default function PotluckSection() {
                               <span className="text-white font-bold text-sm">{signup.item}</span>
                               <span className="text-slate-500 text-xs ml-2">by {signup.name}</span>
                             </div>
-                            <button
-                              onClick={() => handleDelete(signup.id)}
-                              disabled={deletingId === signup.id}
-                              title="Remove"
-                              className="opacity-0 group-hover:opacity-100 transition rounded-lg p-1 hover:bg-red-500/20 disabled:opacity-30"
-                            >
-                              <Trash2 className="w-4 h-4 text-red-400" />
-                            </button>
+                            {isAdmin && (
+                              <button
+                                onClick={() => handleDelete(signup.id)}
+                                disabled={deletingId === signup.id}
+                                title="Remove"
+                                className="opacity-0 group-hover:opacity-100 transition rounded-lg p-1 hover:bg-red-500/20 disabled:opacity-30"
+                              >
+                                <Trash2 className="w-4 h-4 text-red-400" />
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>

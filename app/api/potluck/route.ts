@@ -4,6 +4,10 @@ import { FieldValue } from "firebase-admin/firestore";
 
 const VALID_CATEGORIES = ["Appetizer", "Main Dish", "Side", "Dessert", "Drinks", "Other"];
 
+function requireAdmin(req: NextRequest) {
+  return req.cookies.get("admin-auth")?.value === "granted";
+}
+
 export async function GET() {
   const snap = await adminDb
     .collection("potluck")
@@ -29,6 +33,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  if (!requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await req.json();
   if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
   await adminDb.collection("potluck").doc(id).delete();
