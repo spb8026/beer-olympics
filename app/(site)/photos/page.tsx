@@ -137,6 +137,37 @@ function DisplayMode({ photos, onExit }: { photos: Photo[]; onExit: () => void }
   );
 }
 
+// ─── Image compression ─────────────────────────────────────────────────────
+
+// Compresses and converts any image (including HEIC from iOS) to JPEG.
+// Caps width at 1920px; outputs ~200–600 KB regardless of source format.
+async function compressImage(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const MAX_WIDTH = 1920;
+      const scale = Math.min(1, MAX_WIDTH / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) { reject(new Error("Image compression failed")); return; }
+          const name = file.name.replace(/\.[^.]+$/, ".jpg");
+          resolve(new File([blob], name, { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        0.85
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error("Could not read image")); };
+    img.src = objectUrl;
+  });
+}
+
 // ─── Upload form ───────────────────────────────────────────────────────────
 
 function UploadForm({ onUploaded }: { onUploaded: () => void }) {
@@ -161,8 +192,9 @@ function UploadForm({ onUploaded }: { onUploaded: () => void }) {
     setUploading(true);
     setError("");
     try {
+      const compressed = await compressImage(file);
       const form = new FormData();
-      form.append("photo", file);
+      form.append("photo", compressed);
       if (name.trim()) form.append("uploadedBy", name.trim());
       const res = await fetch("/api/photos", { method: "POST", body: form });
       if (!res.ok) {

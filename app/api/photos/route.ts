@@ -20,14 +20,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
   }
 
+  if (!(file as File).type.startsWith("image/")) {
+    return NextResponse.json({ error: "Only image files are allowed" }, { status: 400 });
+  }
+
   const buffer = Buffer.from(await file.arrayBuffer());
 
   if (buffer.byteLength > MAX_BYTES) {
     return NextResponse.json({ error: "File too large (max 10 MB)" }, { status: 400 });
-  }
-
-  if (!(file as File).type.startsWith("image/")) {
-    return NextResponse.json({ error: "Only image files are allowed" }, { status: 400 });
   }
 
   const { secure_url, public_id } = await uploadBuffer(buffer, { folder: "party-photos" });
