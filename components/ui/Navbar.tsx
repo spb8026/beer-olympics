@@ -76,6 +76,19 @@ export default function Navbar() {
               </li>
             );
           })}
+          <li>
+            <a
+              href="https://venmo.com/u/Shawnbroderick65"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition text-slate-300 hover:bg-white/8 hover:text-white"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M19.5 2C20.7 4.3 21 6.1 21 8.3c0 5.8-4.9 13.3-8.9 18.6H4.9L2 3.8l7.3-.7 1.5 12.3c1.4-2.4 3.1-6.1 3.1-8.7 0-1.4-.2-2.4-.6-3.2L19.5 2z"/>
+              </svg>
+              <span className="hidden sm:inline">Venmo</span>
+            </a>
+          </li>
         </ul>
       </nav>
     </header>
