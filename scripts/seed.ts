@@ -34,7 +34,7 @@ const games = [
     description:
       "The classic. Two teams face off across a table, taking turns throwing a ping pong ball into the opposing team's cups.",
     rules: [
-      "Teams of 2 stand at opposite ends of the table",
+      "Teams of 4 stand at opposite ends of the table",
       "10 cups arranged in a triangle formation on each side",
       "Alternate throwing — sink a cup, opponents must drink it",
       "Bouncing is allowed but opponents can swat after one bounce",
